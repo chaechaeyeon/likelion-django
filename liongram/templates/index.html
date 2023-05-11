@@ -1,0 +1,14 @@
+{%extends 'base.html' %}
+{% load static %}
+
+{% block title %}인덱스{% endblock %}
+
+{% block content %}
+  <main>
+    <div class = "card-list">
+       {% include 'mixin/posts/post_card.html' %}
+    </div>
+   
+  </main>
+ 
+{% endblock%}
