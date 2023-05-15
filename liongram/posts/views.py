@@ -1,26 +1,87 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
+from django.http import Http404, HttpResponse, JsonResponse
 
 from django.views.generic import ListView
+from django.contrib.auth.decorators import login_required
 from .models import Post
 
 def index(request):
-    return render(request,'index.html')
+    post_list = Post.objects.all().order_by('-created_at') #Post 전체 데이터 조회
+
+    context = {
+        'post_list':post_list,
+
+    }
+    return render(request,'index.html',context)
 
 def post_list_view(request):
-    return render(request,'posts/post_list.html')
+    post_list = Post.objects.all() #Post 전체 데이터 조회
+   # post_list = Post.objects.filter(writer=request.user) #post.writer가 현재 로그인인 것 조회 
+   # post_list = None 
+    context = {
+        'post_list':post_list,
+
+    }
+    return render(request,'posts/post_list.html',context)
 
 def post_detail_view(request, id):
-    return render(request,'posts/post_detail.html')
+    try:
+        post = Post.objects.get(id=id)
+    except Post.DoesNotExist:
+        return redirect('index')
+    context = {
+        'post':post,
+    }
 
+    return render(request,'posts/post_detail.html', context)
+
+@login_required
 def post_create_view(request):
-    return render(request,'posts/post_form.html')
+    if request.method =='GET':
+        return render(request,'posts/post_form.html')
+    else:
+        image= request.FILES.get('image')
+        content= request.POST.get('content')
+        print(image)
+        print(content)
+        Post.objects.create(
+            image= image,
+            content=content,
+            writer=request.user
+        )
+        return redirect('index')
 
 def post_update_view(request, id):
-    return render(request,'posts/post_form.html')
+    post = get_object_or_404 (Post, id=id)
+    if request.method == 'GET':
+        context = { 'post':post }
+        return render(request,'posts/post_form.html', context)
+    elif request.method == 'POST':
+        new_image= request.FILES.get('image')
+        content= request.POST.get('content')
+        print(new_image)
+        print(content)
+        if new_image:
+            post.image.delete()
+            post.image = new_image
+    
+        post.content = content
+        post.save()
+        return redirect('posts:post-detail', post.id)
 
+#@login_required
 def post_delete_view(request, id):
-    return render(request,'posts/post_confirm_delete.html')
+    post = get_object_or_404(Post, id=id)
+    if request.user != post.writer:
+        raise Http404('잘못된 접근입니다')
+    if request.method == 'GET':
+        context= { 'post' : post}
+        return render(request, 'posts/post_confirm_delete.html', context)
+    else:
+        post.delete()
+        return redirect('index')
+
+
 
 #fbv
 def url_view(request):

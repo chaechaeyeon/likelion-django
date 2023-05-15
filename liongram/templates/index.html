@@ -6,8 +6,10 @@
 {% block content %}
   <main>
     <div class = "card-list">
-       {% include 'mixin/posts/post_card.html' %}
-    </div>
+      {% for post in post_list %}
+        {% include 'mixin/posts/post_card.html' with detail=False %}
+      {% endfor %}
+      </div>
    
   </main>
  
