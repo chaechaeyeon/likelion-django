@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .forms import UserCreateForm , SignUpForm
 
@@ -14,7 +14,7 @@ def signup_view(request):
     #post 요청 시 데이터 확인 후 회원 생성
     else: 
         form = SignUpForm(request.POST)
-
+ 
         if form.is_valid():
             #회원가입 처리
             # username = form.cleaned_data['username']
@@ -56,3 +56,11 @@ def login_view(request):
         # if user == None:
         #     pass
         # password = request.POST.get['password']
+
+def logout_view(request):
+    #데이터 유효성 검사
+    if request.user.is_authenticated:
+        # 비즈니스 로직 처리 -- 로그아웃
+        logout(request)
+        #응답
+        return redirect('index')
