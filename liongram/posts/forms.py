@@ -23,7 +23,7 @@ class PostCreateForm(PostBaseForm):
     class Meta(PostBaseForm.Meta):
         fields=['image','content']
 
-    def cleaned_content(self) -> Optional[Dict[str,Any]]:
+    def clean_content(self) -> Optional[Dict[str,Any]]:
         data = self.cleaned_data["content"]
         if "비속어" == data:
             raise forms.ValidationError("비속어는 사용 불가!")
